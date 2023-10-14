@@ -13,3 +13,6 @@ Na intalaçao vai ter que selecionar para baixar para Windows e Android.
 PASSO 2
 Para Executar o Projeto abrir
 CodeUS\Project\CodeUS.dproj 
+
+CASO PRECISE APENAS DO EXECUTÁVEL
+https://github.com/FernandoBMenezes/CodeUS/tree/main/Project/Win64/Release
