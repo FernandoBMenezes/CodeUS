@@ -11,5 +11,5 @@ Na intalaçao vai ter que selecionar para baixar para Windows e Android.
 
 
 PASSO 2
-Para Executar o Projeto
+Para Executar o Projeto abrir
 CodeUS\Project\CodeUS.dproj 
