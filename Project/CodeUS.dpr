@@ -11,5 +11,4 @@ begin
   Application.Initialize;
   Application.CreateForm(TFCodeUS, FCodeUS);
   Application.Run;
-
 end.
