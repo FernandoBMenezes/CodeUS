@@ -59,6 +59,9 @@ type
         TimerAlerta: TTimer;
         RoundRectZerarPontos: TRoundRect;
         Label2: TLabel;
+        RoundRectVoltar: TRoundRect;
+        Label3: TLabel;
+    ImagemTarefaTravada: TImage;
         procedure FormCreate(Sender: TObject);
         procedure lv_NotasItemClick(const Sender: TObject;
           const AItem: TListViewItem);
@@ -76,6 +79,7 @@ type
         procedure updateScore(userPoints: string);
         procedure TimerAlertaTimer(Sender: TObject);
         procedure RoundRectZerarPontosClick(Sender: TObject);
+        procedure RoundRectVoltarClick(Sender: TObject);
     private
         { Private declarations }
     public
@@ -132,8 +136,16 @@ begin
                 txt.Text := 'D) ' + strResposta2;
 
                 if NOT(IDD.ToInteger * 5 < Pontos) OR (Pontos = 0) then
-                    TListItemImage(Objects.FindDrawable('ImgSinc')).Bitmap :=
-                      ImagemTarefaPendente.Bitmap
+                    if IDD.ToInteger * 5 > Pontos then
+                    begin
+                      TListItemImage(Objects.FindDrawable('ImgSinc')).Bitmap
+                          := ImagemTarefaTravada.Bitmap
+                    end
+                    else
+                    begin
+                        TListItemImage(Objects.FindDrawable('ImgSinc')).Bitmap
+                          := ImagemTarefaPendente.Bitmap
+                    end
                 else
                     TListItemImage(Objects.FindDrawable('ImgSinc')).Bitmap :=
                       ImagemTarefaCompleta.Bitmap;
@@ -426,7 +438,7 @@ begin
     end
     else
     begin
-        LblName.Text := 'Ola, ' + readTXT('/UserData.txt')[0] + '.';
+        LblName.Text := 'Olá, ' + readTXT('/UserData.txt')[0] + '.';
         Pontos := readTXT('/UserData.txt')[1].ToInteger;
         LblPontos.Text := readTXT('/UserData.txt')[1];
     end;
@@ -450,7 +462,7 @@ begin
             //
     end;
 
-    LblName.Text := 'Ola, ' + EditNome.Text + '.';
+    LblName.Text := 'Olá, ' + EditNome.Text + '.';
     CaixaSeuNome.Visible := false;
     PainelBloqueio.Visible := false;
 end;
@@ -484,23 +496,26 @@ begin
 
         if AlternativaCerta = 1 then
         begin
-            txtTemp := TextoResposta1.Text;
-            TextoResposta1.Text := TextoResposta0.Text;
-            TextoResposta0.Text := txtTemp;
+            txtTemp := TextoResposta1.Text.Replace('B) ', '');
+            TextoResposta1.Text := 'B) ' + TextoResposta0.Text.Replace
+              ('A) ', '');
+            TextoResposta0.Text := 'A) ' + txtTemp;
         end;
 
         if AlternativaCerta = 2 then
         begin
-            txtTemp := TextoResposta2.Text;
-            TextoResposta2.Text := TextoResposta0.Text;
-            TextoResposta0.Text := txtTemp;
+            txtTemp := TextoResposta2.Text.Replace('C) ', '');
+            TextoResposta2.Text := 'C) ' + TextoResposta0.Text.Replace
+              ('A) ', '');
+            TextoResposta0.Text := 'A) ' + txtTemp;
         end;
 
         if AlternativaCerta = 3 then
         begin
-            txtTemp := TextoResposta3.Text;
-            TextoResposta3.Text := TextoResposta0.Text;
-            TextoResposta0.Text := txtTemp;
+            txtTemp := TextoResposta3.Text.Replace('D) ', '');
+            TextoResposta3.Text := 'D) ' + TextoResposta0.Text.Replace
+              ('A) ', '');
+            TextoResposta0.Text := 'A) ' + txtTemp;
         end;
 
         PainelPerguntas.Visible := true;
@@ -510,7 +525,7 @@ begin
     end
     else if (RespostaID.ToInteger * 5 < Pontos) then
     begin
-        LabelPainelAlerta.Text := 'Respondida corretamente!';
+        LabelPainelAlerta.Text := 'Respondida Corretamente!';
         RoundRectZerarPontos.Visible := true;
         PainelAlerta.Visible := true;
         TimerAlerta.Enabled := true;
@@ -567,6 +582,11 @@ begin
         on E: Exception do
             Result := memo;
     end;
+end;
+
+procedure TFCodeUS.RoundRectVoltarClick(Sender: TObject);
+begin
+    PainelPerguntas.Visible := false;
 end;
 
 procedure TFCodeUS.RoundRectZerarPontosClick(Sender: TObject);
