@@ -36,7 +36,7 @@ object FCodeUS: TFCodeUS
       Margins.Bottom = 5.000000000000000000
       Position.X = 5.000000000000000000
       Size.Width = 332.000000000000000000
-      Size.Height = 100.000000000000000000
+      Size.Height = 113.000000000000000000
       Size.PlatformDefault = False
       Stroke.Kind = None
       object LblName: TLabel
@@ -74,7 +74,7 @@ object FCodeUS: TFCodeUS
         Align = Client
         StyledSettings = [Family]
         Size.Width = 332.000000000000000000
-        Size.Height = 35.000000000000000000
+        Size.Height = 48.000000000000000000
         Size.PlatformDefault = False
         TextSettings.Font.Size = 24.000000000000000000
         TextSettings.Font.StyleExt = {00070000000000000004000000}
@@ -95,7 +95,7 @@ object FCodeUS: TFCodeUS
       Margins.Left = 2.000000000000000000
       Margins.Right = 2.000000000000000000
       Size.Width = 338.000000000000000000
-      Size.Height = 350.000000000000000000
+      Size.Height = 337.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 2
       ItemAppearance.ItemHeight = 75
@@ -131,22 +131,22 @@ object FCodeUS: TFCodeUS
           Appearance.PlaceOffset.Y = 15.000000000000000000
         end
         item
-          AppearanceObjectName = 'TxtResposta01'
+          AppearanceObjectName = 'TxtRespostaCorreta'
           AppearanceClassName = 'TTextObjectAppearance'
           Appearance.Visible = False
         end
         item
-          AppearanceObjectName = 'TxtResposta02'
+          AppearanceObjectName = 'TxtResposta0'
           AppearanceClassName = 'TTextObjectAppearance'
           Appearance.Visible = False
         end
         item
-          AppearanceObjectName = 'TxtResposta03'
+          AppearanceObjectName = 'TxtResposta1'
           AppearanceClassName = 'TTextObjectAppearance'
           Appearance.Visible = False
         end
         item
-          AppearanceObjectName = 'TxtResposta04'
+          AppearanceObjectName = 'TxtResposta2'
           AppearanceClassName = 'TTextObjectAppearance'
           Appearance.Visible = False
         end
@@ -407,18 +407,11 @@ object FCodeUS: TFCodeUS
         Position.Y = 287.000000000000000000
         Visible = False
       end
-      object Image1: TImage
-        MultiResBitmap = <
-          item
-          end>
-        Position.X = 96.000000000000000000
-        Position.Y = 288.000000000000000000
-      end
     end
     object Label1: TLabel
       Align = Top
       StyledSettings = [Family, FontColor]
-      Position.Y = 105.000000000000000000
+      Position.Y = 118.000000000000000000
       Size.Width = 342.000000000000000000
       Size.Height = 33.000000000000000000
       Size.PlatformDefault = False
@@ -430,7 +423,7 @@ object FCodeUS: TFCodeUS
     end
     object PainelDificuldades: TPanel
       Align = Top
-      Position.Y = 138.000000000000000000
+      Position.Y = 151.000000000000000000
       Size.Width = 342.000000000000000000
       Size.Height = 41.000000000000000000
       Size.PlatformDefault = False
@@ -441,7 +434,7 @@ object FCodeUS: TFCodeUS
         Margins.Left = 20.000000000000000000
         Margins.Right = 20.000000000000000000
         Position.X = 20.000000000000000000
-        Size.Width = 141.000000000000000000
+        Size.Width = 125.000000000000000000
         Size.Height = 41.000000000000000000
         Size.PlatformDefault = False
         Stroke.Color = claBlueviolet
@@ -449,7 +442,7 @@ object FCodeUS: TFCodeUS
         object LblFacil: TLabel
           Align = Contents
           StyledSettings = [Family]
-          Size.Width = 141.000000000000000000
+          Size.Width = 125.000000000000000000
           Size.Height = 41.000000000000000000
           Size.PlatformDefault = False
           TextSettings.Font.Size = 26.000000000000000000
@@ -461,12 +454,12 @@ object FCodeUS: TFCodeUS
         end
       end
       object CaixaDificuldadeDificil: TRoundRect
-        Align = MostRight
+        Align = Right
         Fill.Kind = None
         Margins.Left = 20.000000000000000000
         Margins.Right = 20.000000000000000000
-        Position.X = 180.000000000000000000
-        Size.Width = 142.000000000000000000
+        Position.X = 200.000000000000000000
+        Size.Width = 122.000000000000000000
         Size.Height = 41.000000000000000000
         Size.PlatformDefault = False
         Stroke.Color = claBlueviolet
@@ -474,7 +467,7 @@ object FCodeUS: TFCodeUS
         object LblDificil: TLabel
           Align = Contents
           StyledSettings = [Family]
-          Size.Width = 142.000000000000000000
+          Size.Width = 122.000000000000000000
           Size.Height = 41.000000000000000000
           Size.PlatformDefault = False
           TextSettings.Font.Size = 26.000000000000000000
@@ -494,7 +487,7 @@ object FCodeUS: TFCodeUS
     Size.PlatformDefault = False
     Visible = False
     TabOrder = 1
-    object CaixaResposta02: TRoundRect
+    object CaixaResposta1: TRoundRect
       Align = Top
       Corners = []
       Margins.Left = 10.000000000000000000
@@ -508,7 +501,7 @@ object FCodeUS: TFCodeUS
       Size.PlatformDefault = False
       Stroke.Kind = None
       OnClick = CaixaResposta1Click
-      object TextoResposta02: TLabel
+      object TextoResposta1: TLabel
         Align = Client
         StyledSettings = [Family]
         Margins.Left = 10.000000000000000000
@@ -523,7 +516,7 @@ object FCodeUS: TFCodeUS
         TabOrder = 0
       end
     end
-    object CaixaResposta01: TRoundRect
+    object CaixaResposta0: TRoundRect
       Align = Top
       Corners = [TopLeft, TopRight]
       Margins.Left = 10.000000000000000000
@@ -537,7 +530,7 @@ object FCodeUS: TFCodeUS
       Size.PlatformDefault = False
       Stroke.Kind = None
       OnClick = CaixaResposta0Click
-      object TextoResposta01: TLabel
+      object TextoResposta0: TLabel
         Align = Client
         StyledSettings = [Family]
         Margins.Left = 10.000000000000000000
@@ -552,7 +545,7 @@ object FCodeUS: TFCodeUS
         TabOrder = 0
       end
     end
-    object CaixaResposta04: TRoundRect
+    object CaixaResposta3: TRoundRect
       Align = Top
       Corners = [BottomLeft, BottomRight]
       Margins.Left = 10.000000000000000000
@@ -566,7 +559,7 @@ object FCodeUS: TFCodeUS
       Size.PlatformDefault = False
       Stroke.Kind = None
       OnClick = CaixaResposta3Click
-      object TextoResposta04: TLabel
+      object TextoResposta3: TLabel
         Align = Client
         StyledSettings = [Family]
         Margins.Left = 10.000000000000000000
@@ -581,7 +574,7 @@ object FCodeUS: TFCodeUS
         TabOrder = 0
       end
     end
-    object CaixaResposta03: TRoundRect
+    object CaixaResposta2: TRoundRect
       Align = Top
       Corners = []
       Margins.Left = 10.000000000000000000
@@ -595,7 +588,7 @@ object FCodeUS: TFCodeUS
       Size.PlatformDefault = False
       Stroke.Kind = None
       OnClick = CaixaResposta2Click
-      object TextoResposta03: TLabel
+      object TextoResposta2: TLabel
         Align = Client
         StyledSettings = [Family]
         Margins.Left = 10.000000000000000000
@@ -690,17 +683,17 @@ object FCodeUS: TFCodeUS
     Enabled = False
     Interval = 2000
     OnTimer = TimerErrouTimer
-    Left = 208
+    Left = 160
     Top = 472
   end
   object PainelBloqueio: TPanel
     Align = Client
     Opacity = 0.300000011920929000
     Size.Width = 342.000000000000000000
-    Size.Height = 499.000000000000000000
+    Size.Height = 529.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 5
+    TabOrder = 6
   end
   object CaixaSeuNome: TRoundRect
     Align = VertCenter
@@ -791,7 +784,7 @@ object FCodeUS: TFCodeUS
     Size.Height = 529.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 7
+    TabOrder = 8
     object CaixaSplash: TRoundRect
       Align = Contents
       Corners = []
@@ -834,7 +827,63 @@ object FCodeUS: TFCodeUS
   end
   object TimerSplash: TTimer
     OnTimer = TimerSplashTimer
-    Left = 296
+    Left = 280
     Top = 472
+  end
+  object PainelAlerta: TPanel
+    Align = Client
+    Opacity = 0.899999976158142100
+    Size.Width = 342.000000000000000000
+    Size.Height = 529.000000000000000000
+    Size.PlatformDefault = False
+    Visible = False
+    TabOrder = 5
+    object LabelPainelAlerta: TLabel
+      Align = Center
+      AutoSize = True
+      StyledSettings = [Size, FontColor]
+      Size.Width = 305.000000000000000000
+      Size.Height = 16.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.Font.Family = '(Default)'
+      TextSettings.Font.StyleExt = {00070000000000000004000000}
+      TextSettings.HorzAlign = Center
+      Text = 'TEXTO'
+      TabOrder = 0
+    end
+    object RoundRectZerarPontos: TRoundRect
+      Align = Bottom
+      Fill.Kind = None
+      Margins.Left = 20.000000000000000000
+      Margins.Right = 20.000000000000000000
+      Margins.Bottom = 10.000000000000000000
+      Position.X = 20.000000000000000000
+      Position.Y = 486.000000000000000000
+      Size.Width = 302.000000000000000000
+      Size.Height = 33.000000000000000000
+      Size.PlatformDefault = False
+      Stroke.Color = claBlueviolet
+      OnClick = RoundRectZerarPontosClick
+      object Label2: TLabel
+        Align = Contents
+        StyledSettings = [Family]
+        Size.Width = 302.000000000000000000
+        Size.Height = 33.000000000000000000
+        Size.PlatformDefault = False
+        TextSettings.Font.Size = 26.000000000000000000
+        TextSettings.Font.StyleExt = {00070000000000000004000000}
+        TextSettings.FontColor = claBlueviolet
+        TextSettings.HorzAlign = Center
+        Text = 'Zerar Pontos'
+        TabOrder = 0
+      end
+    end
+  end
+  object TimerAlerta: TTimer
+    Enabled = False
+    Interval = 2000
+    OnTimer = TimerAlertaTimer
+    Left = 34
+    Top = 475
   end
 end

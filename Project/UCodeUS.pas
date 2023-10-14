@@ -8,7 +8,7 @@ uses
     FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs,
     FMX.DateTimeCtrls, FMX.Controls.Presentation, FMX.StdCtrls, FMX.Objects,
     FMX.ListView.Types, FMX.ListView.Appearances, FMX.ListView.Adapters.Base,
-    FMX.Edit, FMX.ListView, System.IOUtils;
+    FMX.Edit, FMX.ListView, System.IOUtils, Data.DB, Data.SqlExpr;
 
 type
     TFCodeUS = class(TForm)
@@ -25,16 +25,16 @@ type
         ImagemTarefaCompleta: TImage;
         ImagemTarefaPendente: TImage;
         PainelPerguntas: TPanel;
-        CaixaResposta02: TRoundRect;
-        CaixaResposta01: TRoundRect;
-        CaixaResposta04: TRoundRect;
-        CaixaResposta03: TRoundRect;
+        CaixaResposta1: TRoundRect;
+        CaixaResposta0: TRoundRect;
+        CaixaResposta3: TRoundRect;
+        CaixaResposta2: TRoundRect;
         CaixaDePergunta: TRoundRect;
         LblTextoPergunta: TLabel;
-        TextoResposta01: TLabel;
-        TextoResposta02: TLabel;
-        TextoResposta03: TLabel;
-        TextoResposta04: TLabel;
+        TextoResposta0: TLabel;
+        TextoResposta1: TLabel;
+        TextoResposta2: TLabel;
+        TextoResposta3: TLabel;
         LblPergunta: TLabel;
         LblErrou: TLabel;
         TimerErrou: TTimer;
@@ -54,7 +54,11 @@ type
         CaixaSplash: TRoundRect;
         LblTextSplash: TLabel;
         TimerSplash: TTimer;
-        Image1: TImage;
+        PainelAlerta: TPanel;
+        LabelPainelAlerta: TLabel;
+        TimerAlerta: TTimer;
+        RoundRectZerarPontos: TRoundRect;
+        Label2: TLabel;
         procedure FormCreate(Sender: TObject);
         procedure lv_NotasItemClick(const Sender: TObject;
           const AItem: TListViewItem);
@@ -70,26 +74,28 @@ type
         procedure SaveTXT(sTexts: TStrings; sArquivo: string);
         function readTXT(sArquivo: string): TStrings;
         procedure updateScore(userPoints: string);
+        procedure TimerAlertaTimer(Sender: TObject);
+        procedure RoundRectZerarPontosClick(Sender: TObject);
     private
         { Private declarations }
     public
-        procedure AddList(Completa, IDD, strNome, strPergunta, strResposta01,
-          strResposta02, strResposta03, strResposta04: string);
+        procedure AddList(Completa, IDD, strNome, strPergunta,
+          strRespostaCorreta, strResposta0, strResposta1, strResposta2: string);
         { Public declarations }
     end;
 
 var
     FCodeUS: TFCodeUS;
-    Pontos: Integer;
-    RespostaCerta: String;
+    Pontos, AlternativaCerta: Integer;
+    RespostaID: String;
 
 implementation
 
 {$R *.fmx}
 
 // IDLOCAL 0... //IDD ID DO BANCO //IDNumCupom NUMERO DO CUPOM //strData DATA //strNome NOME //temIcone Icone
-procedure TFCodeUS.AddList(Completa, IDD, strNome, strPergunta, strResposta01,
-  strResposta02, strResposta03, strResposta04: string);
+procedure TFCodeUS.AddList(Completa, IDD, strNome, strPergunta,
+  strRespostaCorreta, strResposta0, strResposta1, strResposta2: string);
 var
     item: TListViewItem;
     txt: TListItemText;
@@ -112,19 +118,20 @@ begin
                 txt := TListItemText(Objects.FindDrawable('TxtPergunta'));
                 txt.Text := strPergunta;
                 // RESPOSTA 01
-                txt := TListItemText(Objects.FindDrawable('TxtResposta01'));
-                txt.Text := strResposta01;
+                txt := TListItemText
+                  (Objects.FindDrawable('TxtRespostaCorreta'));
+                txt.Text := 'A) ' + strRespostaCorreta;
                 // RESPOSTA 02
-                txt := TListItemText(Objects.FindDrawable('TxtResposta02'));
-                txt.Text := strResposta02;
+                txt := TListItemText(Objects.FindDrawable('TxtResposta0'));
+                txt.Text := 'B) ' + strResposta0;
                 // RESPOSTA 03
-                txt := TListItemText(Objects.FindDrawable('TxtResposta03'));
-                txt.Text := strResposta03;
+                txt := TListItemText(Objects.FindDrawable('TxtResposta1'));
+                txt.Text := 'C) ' + strResposta1;
                 // RESPOSTA 04
-                txt := TListItemText(Objects.FindDrawable('TxtResposta04'));
-                txt.Text := strResposta04;
+                txt := TListItemText(Objects.FindDrawable('TxtResposta2'));
+                txt.Text := 'D) ' + strResposta2;
 
-                if Completa = '0' then
+                if NOT(IDD.ToInteger * 5 < Pontos) OR (Pontos = 0) then
                     TListItemImage(Objects.FindDrawable('ImgSinc')).Bitmap :=
                       ImagemTarefaPendente.Bitmap
                 else
@@ -143,170 +150,189 @@ end;
 
 procedure TFCodeUS.CaixaDificuldadeDificilClick(Sender: TObject);
 var
-    Pergunta, Resposta0, Resposta1, Resposta2, Resposta3: String;
+    Pergunta, RespostaCorreta, Resposta0, Resposta1, Resposta2: String;
 begin
-    // DIFICIL
-    lv_Notas.Items.Clear;
-    LblDificil.TextSettings.FontColor := TAlphaColors.Blueviolet;
-    LblFacil.TextSettings.FontColor := TAlphaColors.Darkgrey;
+    if Pontos >= 30 then
+    begin
+        // DIFICIL
+        lv_Notas.Items.Clear;
+        LblDificil.TextSettings.FontColor := TAlphaColors.Blueviolet;
+        LblFacil.TextSettings.FontColor := TAlphaColors.Darkgrey;
 
-    Pergunta :=
-      'O que é um "loop infinito" em programação e por que ele deve ser evitado?';
-    Resposta0 :=
-      'A) Um loop infinito é um tipo de erro que ocorre em linguagens de programação, mas não precisa ser evitado.';
-    Resposta1 :=
-      'B) Um loop infinito é um tipo de estrutura que executa repetidamente sem uma condição de parada, deve ser evitado pois pode sobrecarregar o sistema.';
-    Resposta2 :=
-      'C) Um loop infinito é um loop que executa apenas uma vez e, portanto, não precisa ser evitado.';
-    Resposta3 :=
-      'D) Um loop infinito é uma técnica avançada usada para aumentar o desempenho do código e, portanto, não deve ser evitado.';
-    AddList('0', '1', 'Questão 06', Pergunta, Resposta0, Resposta1, Resposta2,
-      Resposta3);
+        Pergunta :=
+          'O que é um "loop infinito" em programação e por que ele deve ser evitado?';
+        RespostaCorreta :=
+          'Um loop infinito é um tipo de estrutura que executa repetidamente sem uma condição de parada, deve ser evitado pois pode sobrecarregar o sistema.';
+        // CORRETA
+        Resposta0 :=
+          'Um loop infinito é um tipo de erro que ocorre em linguagens de programação, mas não precisa ser evitado.';
+        Resposta1 :=
+          'Um loop infinito é um loop que executa apenas uma vez e, portanto, não precisa ser evitado.';
+        Resposta2 :=
+          'Um loop infinito é uma técnica avançada usada para aumentar o desempenho do código e, portanto, não deve ser evitado.';
+        AddList('0', '6', 'Questão 06', Pergunta, RespostaCorreta, Resposta0,
+          Resposta1, Resposta2);
 
-    Pergunta :=
-      'O que é um "framework" de desenvolvimento de software?';
-    Resposta0 :=
-      'A) Um framework é um conjunto de bibliotecas, diretrizes e convenções que auxiliam no desenvolvimento de software';//CORRETA
-    Resposta1 :=
-      'B) Um framework é um tipo de erro de programação.';
-    Resposta2 :=
-      'C) Um framework é uma linguagem de programação específica para o desenvolvimento web.';
-    Resposta3 :=
-      'D) Um framework é um programa que executa automaticamente todo o código do desenvolvimento.';
-    AddList('0', '0', 'Questão 07', Pergunta, Resposta0, Resposta1, Resposta2,
-      Resposta3);
+        Pergunta := 'O que é um "framework" de desenvolvimento de software?';
+        RespostaCorreta :=
+          'Um framework é um conjunto de bibliotecas, diretrizes e convenções que auxiliam no desenvolvimento de software';
+        // CORRETA
+        Resposta0 := 'Um framework é um tipo de erro de programação.';
+        Resposta1 :=
+          'Um framework é uma linguagem de programação específica para o desenvolvimento web.';
+        Resposta2 :=
+          'Um framework é um programa que executa automaticamente todo o código do desenvolvimento.';
+        AddList('0', '7', 'Questão 07', Pergunta, RespostaCorreta, Resposta0,
+          Resposta1, Resposta2);
 
-    Pergunta :=
-      'O que é "versionamento de software" e por que é importante?';
-    Resposta0 :=
-      'A) O versionamento de software se refere à atualização de hardware em um sistema e não é importante.';
-    Resposta1 :=
-      'B) O versionamento de software é a prática de controlar e registrar as alterações em um sistema ao longo do tempo, o que é importante para rastrear o histórico, colaborar com outros desenvolvedores e evitar problemas.';
-    Resposta2 :=
-      'C) O versionamento de software se refere à criação de versões de um sistema, mas não é importante em desenvolvimento.';
-    Resposta3 :=
-      'D) O versionamento de software se refere à criação de novos recursos em um sistema e não é importante.';
-    AddList('0', '1', 'Questão 08', Pergunta, Resposta0, Resposta1, Resposta2,
-      Resposta3);
+        Pergunta :=
+          'O que é "versionamento de software" e por que é importante?';
+        RespostaCorreta :=
+          'O versionamento de software é a prática de controlar e registrar as alterações em um sistema ao longo do tempo, importante para rastrear o histórico de edições de cada colaborador.';
+        // Correta
+        Resposta0 :=
+          'O versionamento de software se refere à atualização de hardware em um sistema e não é importante.';
+        Resposta1 :=
+          'O versionamento de software se refere à criação de versões de um sistema, mas não é importante em desenvolvimento.';
+        Resposta2 :=
+          'O versionamento de software se refere à criação de novos recursos em um sistema e não é importante.';
+        AddList('0', '8', 'Questão 08', Pergunta, RespostaCorreta, Resposta0,
+          Resposta1, Resposta2);
 
-    Pergunta :=
-      'O que é "depuração" no contexto da programação?';
-    Resposta0 :=
-      'A) Depuração é o processo de esconder erros de código para que o programa funcione sem problemas.';
-    Resposta1 :=
-      'B) Depuração é o processo de criar código sem testes e verificações.';
-    Resposta2 :=
-      'C) Depuração é o processo de identificar e corrigir erros (bugs) no código-fonte de um programa.';//CORRETA
-    Resposta3 :=
-      'D) Depuração é o processo de copiar e colar código de outros programas.';
-    AddList('0', '2', 'Questão 09', Pergunta, Resposta0, Resposta1, Resposta2,
-      Resposta3);
+        Pergunta := 'O que é "depuração" no contexto da programação?';
+        RespostaCorreta :=
+          'Depuração é o processo de identificar e corrigir erros (bugs) no código-fonte de um programa.';
+        // CORRETA
+        Resposta0 :=
+          'Depuração é o processo de esconder erros de código para que o programa funcione sem problemas.';
+        Resposta1 :=
+          'Depuração é o processo de criar código sem testes e verificações.';
+        Resposta2 :=
+          'Depuração é o processo de copiar e colar código de outros programas.';
+        AddList('0', '9', 'Questão 09', Pergunta, RespostaCorreta, Resposta0,
+          Resposta1, Resposta2);
 
-    Pergunta :=
-      'O que é um "algoritmo de ordenação" e por que diferentes algoritmos de ordenação são usados em desenvolvimento de software?';
-    Resposta0 :=
-      'A) Um algoritmo de ordenação é uma técnica para criar listas de reprodução de músicas em ordem aleatória.';
-    Resposta1 :=
-      'B) Algoritmos de ordenação não são usados em desenvolvimento de software.';
-    Resposta2 :=
-      'C) Um algoritmo de ordenação é um conjunto de regras para classificar dados em uma ordem específica, e diferentes são usados para otimizar o desempenho e a eficiência.';//CORRETA
-    Resposta3 :=
-      'D) Um algoritmo de ordenação é um método para criptografar dados em um sistema de segurança.';
-    AddList('0', '2', 'Questão 10', Pergunta, Resposta0, Resposta1, Resposta2,
-      Resposta3);
+        Pergunta :=
+          'O que é um "algoritmo de ordenação" e por que diferentes algoritmos de ordenação são usados em desenvolvimento de software?';
+        RespostaCorreta :=
+          'Um algoritmo de ordenação é um conjunto de regras para classificar dados em uma ordem específica, e diferentes são usados para otimizar o desempenho e a eficiência.';
+        // CORRETA
+        Resposta0 :=
+          'Um algoritmo de ordenação é uma técnica para criar listas de reprodução de músicas em ordem aleatória.';
+        Resposta1 :=
+          'Algoritmos de ordenação não são usados em desenvolvimento de software.';
+        Resposta2 :=
+          'Um algoritmo de ordenação é um método para criptografar dados em um sistema de segurança.';
+        AddList('0', '10', 'Questão 10', Pergunta, RespostaCorreta, Resposta0,
+          Resposta1, Resposta2);
 
-    Pergunta :=
-      'O que é "concorrência" e "paralelismo" em programação e qual é a diferença fundamental entre eles?';
-    Resposta0 :=
-      'A) Concorrência e paralelismo são termos que não se aplicam à programação.';
-    Resposta1 :=
-      'B) Concorrência refere-se a executar várias tarefas ao mesmo tempo, e o paralelismo é a execução de uma tarefa por vez.';//CORRETA
-    Resposta2 :=
-      'C) Concorrência e paralelismo são termos intercambiáveis e não têm diferença fundamental.';
-    Resposta3 :=
-      'D) Concorrência é a execução de um único processo de forma eficiente, enquanto o paralelismo é a execução de várias tarefas independentes ao mesmo tempo.';
-    AddList('0', '1', 'Questão 11', Pergunta, Resposta0, Resposta1, Resposta2,
-      Resposta3);
+        Pergunta :=
+          'O que é "concorrência" e "paralelismo" em programação e qual é a diferença fundamental entre eles?';
+        RespostaCorreta :=
+          'Concorrência refere-se a executar várias tarefas ao mesmo tempo, e o paralelismo é a execução de uma tarefa por vez.';
+        // CORRETA
+        Resposta0 :=
+          'Concorrência e paralelismo são termos que não se aplicam à programação.';
+        Resposta1 :=
+          'Concorrência e paralelismo são termos intercambiáveis e não têm diferença fundamental.';
+        Resposta2 :=
+          'Concorrência é a execução de um único processo de forma eficiente, enquanto o paralelismo é a execução de várias tarefas independentes ao mesmo tempo.';
+        AddList('0', '11', 'Questão 11', Pergunta, RespostaCorreta, Resposta0,
+          Resposta1, Resposta2);
+    end
+    else
+    begin
+        LabelPainelAlerta.Text := 'Mínimo de 30 pontos!';
+        PainelAlerta.Visible := true;
+        TimerAlerta.Enabled := true;
+    end;
 end;
 
 procedure TFCodeUS.CaixaDificuldadeFacilClick(Sender: TObject);
 var
-    Pergunta, Resposta0, Resposta1, Resposta2, Resposta3: String;
+    Pergunta, RespostaCorreta, Resposta0, Resposta1, Resposta2: String;
 begin
-    // FACIL
-    lv_Notas.Items.Clear;
-    LblDificil.TextSettings.FontColor := TAlphaColors.Darkgrey;
-    LblFacil.TextSettings.FontColor := TAlphaColors.Blueviolet;
+    if Pontos < 30 then
+    begin
+        // FACIL
+        lv_Notas.Items.Clear;
+        LblDificil.TextSettings.FontColor := TAlphaColors.Darkgrey;
+        LblFacil.TextSettings.FontColor := TAlphaColors.Blueviolet;
 
-    Pergunta :=
-      'O que é um tipo de dado conhecido como "Integer e Int" em programação?';
-    Resposta0 := 'A) Um tipo de dado que representa números inteiros.';
-    // CORRETA
-    Resposta1 := 'B) Um tipo de dado que representa textos.';
-    Resposta2 :=
-      'C) Um tipo de dado que representa números com casas decimais.';
-    Resposta3 :=
-      'D) Um tipo de dado que representa valores verdadeiros ou falsos.';
-    AddList('1', '0', 'Questão 00', Pergunta, Resposta0, Resposta1, Resposta2,
-      Resposta3);
+        Pergunta :=
+          'O que é um tipo de dado conhecido como "Integer e Int" em programação?';
+        RespostaCorreta := 'Um tipo de dado que representa números inteiros.';
+        // CORRETA
+        Resposta0 := 'Um tipo de dado que representa textos.';
+        Resposta1 :=
+          'Um tipo de dado que representa números com casas decimais.';
+        Resposta2 :=
+          'Um tipo de dado que representa valores verdadeiros ou falsos.';
+        AddList('0', '0', 'Questão 00', Pergunta, RespostaCorreta, Resposta0,
+          Resposta1, Resposta2);
 
-    Pergunta := 'Para que serve o tipo de dado "Boolean" na programação?';
-    Resposta0 := 'A) É utilizado para representar datas e horas.';
-    Resposta1 := 'B) É utilizado para representar números inteiros.';
-    Resposta2 :=
-      'C) É utilizado para representar valores verdadeiros/true ou falsos/false em lógica de programação.';
-    // CORRETA
-    Resposta3 := 'D) É utilizado para representar valores monetários.';
-    AddList('0', '2', 'Questão 01', Pergunta, Resposta0, Resposta1, Resposta2,
-      Resposta3);
+        Pergunta := 'Para que serve o tipo de dado "Boolean" na programação?';
+        RespostaCorreta :=
+          'É utilizado para representar valores verdadeiros/true ou falsos/false em lógica de programação.';
+        // CORRETA
+        Resposta0 := 'É utilizado para representar datas e horas.';
+        Resposta1 := 'É utilizado para representar números inteiros.';
+        Resposta2 := 'É utilizado para representar valores monetários.';
+        AddList('0', '1', 'Questão 01', Pergunta, RespostaCorreta, Resposta0,
+          Resposta1, Resposta2);
 
-    Pergunta :=
-      'O que é um tipo de dado conhecido como "String" em programação?';
-    Resposta0 := 'A) Um tipo de dado que representa números inteiros.';
-    Resposta1 := 'B) Um tipo de dado que representa textos.'; // CORRETA
-    Resposta2 :=
-      'C) Um tipo de dado que representa números com casas decimais.';
-    Resposta3 :=
-      'D) Um tipo de dado que representa valores verdadeiros ou falsos.';
-    AddList('0', '1', 'Questão 02', Pergunta, Resposta0, Resposta1, Resposta2,
-      Resposta3);
+        Pergunta :=
+          'O que é um tipo de dado conhecido como "String" em programação?';
+        RespostaCorreta := 'Um tipo de dado que representa textos.'; // CORRETA
+        Resposta0 := 'Um tipo de dado que representa números inteiros.';
+        Resposta1 :=
+          'Um tipo de dado que representa números com casas decimais.';
+        Resposta2 :=
+          'Um tipo de dado que representa valores verdadeiros ou falsos.';
+        AddList('0', '2', 'Questão 02', Pergunta, RespostaCorreta, Resposta0,
+          Resposta1, Resposta2);
 
-    Pergunta := 'Para que serve o tipo de dado "Char" na programação?';
-    Resposta0 := 'A) É utilizado para representar datas e horas.';
-    Resposta1 := 'B) É utilizado para representar números inteiros.';
-    Resposta2 := 'C) É utilizado para representar caracteres individuais.';
-    // CORRETA
-    Resposta3 :=
-      'D) Um tipo de dado que representa valores verdadeiros ou falsos.';
-    AddList('0', '2', 'Questão 03', Pergunta, Resposta0, Resposta1, Resposta2,
-      Resposta3);
+        Pergunta := 'Para que serve o tipo de dado "Char" na programação?';
+        RespostaCorreta :=
+          'É utilizado para representar caracteres individuais.';
+        // CORRETA
+        Resposta0 := 'É utilizado para representar datas e horas.';
+        Resposta1 := 'É utilizado para representar números inteiros.';
+        Resposta2 :=
+          'Um tipo de dado que representa valores verdadeiros ou falsos.';
+        AddList('0', '3', 'Questão 03', Pergunta, RespostaCorreta, Resposta0,
+          Resposta1, Resposta2);
 
-    Pergunta :=
-      'O que é um tipo de dado conhecido como "Double" em programação?';
-    Resposta0 :=
-      'A) Um tipo de dado que representa números com casas decimais.';
-    // CORRETA
-    Resposta1 :=
-      'B) Um tipo de dado que representa valores verdadeiros ou falsos.';
-    Resposta2 := 'C) Um tipo de dado que representa textos.';
-    Resposta3 := 'D) Um tipo de dado que representa números inteiros.';
-    AddList('0', '0', 'Questão 04', Pergunta, Resposta0, Resposta1, Resposta2,
-      Resposta3);
+        Pergunta :=
+          'O que é um tipo de dado conhecido como "Double" em programação?';
+        RespostaCorreta :=
+          'Um tipo de dado que representa números com casas decimais.';
+        // CORRETA
+        Resposta0 :=
+          'Um tipo de dado que representa valores verdadeiros ou falsos.';
+        Resposta1 := 'Um tipo de dado que representa textos.';
+        Resposta2 := 'Um tipo de dado que representa números inteiros.';
+        AddList('0', '4', 'Questão 04', Pergunta, RespostaCorreta, Resposta0,
+          Resposta1, Resposta2);
 
-    Pergunta := 'Para que serve o tipo de dado "Array" na programação?';
-    Resposta0 := 'A) É utilizado para representar datas e horas.';
-    Resposta1 := 'B) É utilizado para representar números inteiros.';
-    Resposta2 := 'C) É utilizado para representar valores monetários.';
-    Resposta3 := 'D) É utilizado para representar uma coleção de elementos.';
-    // CORRETA
-    AddList('0', '3', 'Questão 05', Pergunta, Resposta0, Resposta1, Resposta2,
-      Resposta3);
+        Pergunta := 'Para que serve o tipo de dado "Array" na programação?';
+        RespostaCorreta :=
+          'É utilizado para representar uma coleção de elementos.';
+        // CORRETA
+        Resposta0 := 'É utilizado para representar datas e horas.';
+        Resposta1 := 'É utilizado para representar números inteiros.';
+        Resposta2 := 'É utilizado para representar valores monetários.';
+        AddList('0', '5', 'Questão 05', Pergunta, RespostaCorreta, Resposta0,
+          Resposta1, Resposta2);
+    end
+    else
+        CaixaDificuldadeDificilClick(self);
 end;
 
 procedure TFCodeUS.CaixaResposta0Click(Sender: TObject);
 begin
     PainelBloqueio.Visible := true;
-    if RespostaCerta.Equals('0') then
+    if AlternativaCerta.ToString.Equals('0') then
     begin
         Pontos := Pontos + 5;
         updateScore(Pontos.ToString);
@@ -321,12 +347,13 @@ begin
         LblErrou.Visible := true;
         TimerErrou.Enabled := true;
     end;
+    CaixaDificuldadeFacilClick(self);
 end;
 
 procedure TFCodeUS.CaixaResposta1Click(Sender: TObject);
 begin
     PainelBloqueio.Visible := true;
-    if RespostaCerta.Equals('1') then
+    if AlternativaCerta.ToString.Equals('1') then
     begin
         Pontos := Pontos + 5;
         updateScore(Pontos.ToString);
@@ -341,12 +368,13 @@ begin
         LblErrou.Visible := true;
         TimerErrou.Enabled := true;
     end;
+    CaixaDificuldadeFacilClick(self);
 end;
 
 procedure TFCodeUS.CaixaResposta2Click(Sender: TObject);
 begin
     PainelBloqueio.Visible := true;
-    if RespostaCerta.Equals('2') then
+    if AlternativaCerta.ToString.Equals('2') then
     begin
         Pontos := Pontos + 5;
         updateScore(Pontos.ToString);
@@ -361,12 +389,13 @@ begin
         LblErrou.Visible := true;
         TimerErrou.Enabled := true;
     end;
+    CaixaDificuldadeFacilClick(self);
 end;
 
 procedure TFCodeUS.CaixaResposta3Click(Sender: TObject);
 begin
     PainelBloqueio.Visible := true;
-    if RespostaCerta.Equals('3') then
+    if AlternativaCerta.ToString.Equals('3') then
     begin
         Pontos := Pontos + 5;
         updateScore(Pontos.ToString);
@@ -381,11 +410,14 @@ begin
         LblErrou.Visible := true;
         TimerErrou.Enabled := true;
     end;
+    CaixaDificuldadeFacilClick(self);
 end;
 
 procedure TFCodeUS.FormCreate(Sender: TObject);
 begin
-    PainelPerguntas.Visible := False;
+    PainelPerguntas.Visible := false;
+    RoundRectZerarPontos.Visible := false;
+    PainelAlerta.Visible := false;
     if (readTXT('/UserData.txt').Count <= 0) then
     begin
         PainelBloqueio.Visible := true;
@@ -419,45 +451,97 @@ begin
     end;
 
     LblName.Text := 'Ola, ' + EditNome.Text + '.';
-    CaixaSeuNome.Visible := False;
-    PainelBloqueio.Visible := False;
+    CaixaSeuNome.Visible := false;
+    PainelBloqueio.Visible := false;
 end;
 
 procedure TFCodeUS.lv_NotasItemClick(const Sender: TObject;
   const AItem: TListViewItem);
+var
+    txtTemp: String;
 begin
-    LblErrou.Visible := False;
-    LblErrou.Text := '✗';
-    LblErrou.TextSettings.FontColor := TAlphaColors.Darkred;
-    // PERGUNTA
-    LblPergunta.Text := TListItemText
-      (AItem.Objects.FindDrawable('TxtPergunta')).Text;
-    // RESPOSTA
-    TextoResposta01.Text :=
-      TListItemText(AItem.Objects.FindDrawable('TxtResposta01')).Text;
-    TextoResposta02.Text :=
-      TListItemText(AItem.Objects.FindDrawable('TxtResposta02')).Text;
-    TextoResposta03.Text :=
-      TListItemText(AItem.Objects.FindDrawable('TxtResposta03')).Text;
-    TextoResposta04.Text :=
-      TListItemText(AItem.Objects.FindDrawable('TxtResposta04')).Text;
-    RespostaCerta := TListItemText(AItem.Objects.FindDrawable('TxtID')).Text;
-    PainelPerguntas.Visible := true;
-    LblTextoPergunta.Text :=
-      TListItemText(AItem.Objects.FindDrawable('TxtNome')).Text;
+    RespostaID := TListItemText(AItem.Objects.FindDrawable('TxtID')).Text;
+    if (RespostaID.ToInteger * 5 = Pontos) then
+    begin
+        AlternativaCerta := random(3);
+
+        LblErrou.Visible := false;
+        LblErrou.Text := '✗';
+        LblErrou.TextSettings.FontColor := TAlphaColors.Darkred;
+
+        // PERGUNTA
+        LblPergunta.Text :=
+          TListItemText(AItem.Objects.FindDrawable('TxtPergunta')).Text;
+        // RESPOSTA
+        TextoResposta0.Text :=
+          TListItemText(AItem.Objects.FindDrawable('TxtRespostaCorreta')).Text;
+        TextoResposta1.Text :=
+          TListItemText(AItem.Objects.FindDrawable('TxtResposta0')).Text;
+        TextoResposta2.Text :=
+          TListItemText(AItem.Objects.FindDrawable('TxtResposta1')).Text;
+        TextoResposta3.Text :=
+          TListItemText(AItem.Objects.FindDrawable('TxtResposta2')).Text;
+
+        if AlternativaCerta = 1 then
+        begin
+            txtTemp := TextoResposta1.Text;
+            TextoResposta1.Text := TextoResposta0.Text;
+            TextoResposta0.Text := txtTemp;
+        end;
+
+        if AlternativaCerta = 2 then
+        begin
+            txtTemp := TextoResposta2.Text;
+            TextoResposta2.Text := TextoResposta0.Text;
+            TextoResposta0.Text := txtTemp;
+        end;
+
+        if AlternativaCerta = 3 then
+        begin
+            txtTemp := TextoResposta3.Text;
+            TextoResposta3.Text := TextoResposta0.Text;
+            TextoResposta0.Text := txtTemp;
+        end;
+
+        PainelPerguntas.Visible := true;
+        LblTextoPergunta.Text :=
+          TListItemText(AItem.Objects.FindDrawable('TxtNome')).Text;
+
+    end
+    else if (RespostaID.ToInteger * 5 < Pontos) then
+    begin
+        LabelPainelAlerta.Text := 'Respondida corretamente!';
+        RoundRectZerarPontos.Visible := true;
+        PainelAlerta.Visible := true;
+        TimerAlerta.Enabled := true;
+    end
+    else
+    begin
+        LabelPainelAlerta.Text := 'Mínimo de ' + (RespostaID.ToInteger * 5)
+          .ToString + ' pontos!';
+        PainelAlerta.Visible := true;
+        TimerAlerta.Enabled := true;
+    end;
+end;
+
+procedure TFCodeUS.TimerAlertaTimer(Sender: TObject);
+begin
+    TimerAlerta.Enabled := false;
+    PainelAlerta.Visible := false;
+    RoundRectZerarPontos.Visible := false;
 end;
 
 procedure TFCodeUS.TimerErrouTimer(Sender: TObject);
 begin
-    PainelPerguntas.Visible := False;
-    PainelBloqueio.Visible := False;
-    TimerErrou.Enabled := False;
+    PainelPerguntas.Visible := false;
+    PainelBloqueio.Visible := false;
+    TimerErrou.Enabled := false;
 end;
 
 procedure TFCodeUS.TimerSplashTimer(Sender: TObject);
 begin
-    TimerSplash.Enabled := False;
-    PainelSplash.Visible := False;
+    TimerSplash.Enabled := false;
+    PainelSplash.Visible := false;
 end;
 
 procedure TFCodeUS.SaveTXT(sTexts: TStrings; sArquivo: string);
@@ -485,11 +569,25 @@ begin
     end;
 end;
 
+procedure TFCodeUS.RoundRectZerarPontosClick(Sender: TObject);
+begin
+    updateScore('0');
+    CaixaDificuldadeFacilClick(self);
+    PainelAlerta.Visible := false;
+end;
+
 procedure TFCodeUS.updateScore(userPoints: string);
 var
     sDocumentos: string;
     memo: TStrings;
 begin
+    LblPontos.Text := userPoints;
+    try
+        Pontos := userPoints.ToInteger();
+    except
+        on E: Exception do
+            Pontos := 0;
+    end;
     sDocumentos := '/UserData.txt';
     try
         memo := TStringList.Create();
