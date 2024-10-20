@@ -3,12 +3,16 @@ program CodeUS;
 uses
   System.StartUpCopy,
   FMX.Forms,
-  UCodeUS in 'UCodeUS.pas' {FCodeUS};
+  UBancoCodeUS in 'Model\UBancoCodeUS.pas',
+  UBancoDAO in 'Model\UBancoDAO.pas' {DMBancoDB: TDataModule} ,
+  UMain in 'Controller\UMain.pas',
+  Main in 'View\Main.pas' {FMain};
 
 {$R *.res}
 
 begin
   Application.Initialize;
-  Application.CreateForm(TFCodeUS, FCodeUS);
+  Application.CreateForm(TFMain, FMain);
   Application.Run;
+
 end.
